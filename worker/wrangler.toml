@@ -1,0 +1,7 @@
+name = "ledgerly-agent"
+main = "index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://zachthedude.github.io"
+MODEL = "gpt-5-mini"

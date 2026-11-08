@@ -1,0 +1,5 @@
+// Sample files for the demo workspace. Same content as the CSVs in examples/.
+const SAMPLES = {
+  orders: { name: "orders_nov_week1.csv", text: "Order No,Customer Name,Courier,Delivery Date,Total (Tk),Delivery Charge\nMH-10321,Sadia Islam,Steadfast,2026-11-03,1450,70\nMH-10322,Imran Hossain,Steadfast,2026-11-03,990,70\nMH-10323,Jannatul Ferdous,Steadfast,2026-11-04,2200,120\nMH-10324,Arif Mahmud,Steadfast,2026-11-04,780,70\nMH-10325,Tasnim Akter,Steadfast,2026-11-05,1650,70\nMH-10326,Rakib Hasan,Steadfast,2026-11-05,540,70\nMH-10327,Nabila Karim,Steadfast,2026-11-06,3100,120\nMH-10328,Shafiq Rahman,Steadfast,2026-11-06,870,70\n" },
+  payouts: { name: "steadfast_statement_2026-11-08.csv", text: "Consignment ID,Invoice,Payable Amount,Payment Date,Note\nSF8841201,MH-10321,1380,2026-11-08,\nSF8841202,MH-10322,920,2026-11-08,\nSF8841203,MH-1O323,2080,2026-11-08,\nSF8841204,MH-10324,650,2026-11-08,Return fee adjusted\nSF8841205,,1580,2026-11-08,Invoice 10325 per merchant\nSF8841207,MH-10327,1490,2026-11-08,Partial payment 1 of 2\nSF8841209,,1490,2026-11-08,Balance for MH 10327\nSF8841210,MH-10328,800,2026-11-08,\n" }
+};

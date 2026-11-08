@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Ledgerly checks courier COD payouts against your orders. An AI agent separates statement errors from money you are really owed, then drafts claims for you to approve.">
+  <meta name="color-scheme" content="light dark">
+  <title>Ledgerly</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2318263A'/%3E%3Cpath d='M9 7v18M11.5 7v18' stroke='%23E2575E' stroke-width='1.6'/%3E%3Cpath d='M15 12h9M15 17h9M15 22h6' stroke='%23FAFBF7' stroke-width='1.8'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wdth,wght@75..125,300..750&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the ledger</a>
+  <header class="bar">
+    <span class="wordmark">ledgerly</span>
+    <span class="shop"><strong id="shop-name">Mrittika Home</strong> <span class="tag" id="data-tag">Sample shop</span></span>
+    <nav class="views" aria-label="Views">
+      <button type="button" class="view-tab" data-view="reconcile" aria-current="page">Reconcile</button>
+      <button type="button" class="view-tab" data-view="claims">Claims <span class="count" id="claim-count">0</span></button>
+    </nav>
+    <button type="button" class="quiet" id="how-open">How the agent works</button>
+  </header>
+
+  <main id="main">
+    <section id="view-reconcile" aria-labelledby="headline">
+      <div class="head">
+        <p class="files" id="files-line"></p>
+        <h1 id="headline"></h1>
+        <p class="subline" id="subline"></p>
+        <div class="head-actions">
+          <button type="button" class="button" id="upload-open">Upload statements</button>
+          <button type="button" class="button" id="export">Export report</button>
+          <button type="button" class="quiet" id="reset-sample" hidden>Back to sample files</button>
+        </div>
+      </div>
+
+      <div class="split">
+        <aside class="worksheet" aria-labelledby="ws-title">
+          <div class="ws-head">
+            <h2 id="ws-title">Agent work sheet</h2>
+            <label class="lang">Claims in
+              <select id="language">
+                <option value="en">English</option>
+                <option value="bn">বাংলা</option>
+              </select>
+            </label>
+          </div>
+          <div id="ws-intro" class="ws-intro"></div>
+          <div id="suggestions"></div>
+          <ol class="steps" id="steps" aria-live="polite"></ol>
+          <div class="ws-foot">
+            <button type="button" class="button primary" id="run-agent">Check with the agent</button>
+            <p class="fine">Column names, a few sample rows and flagged rows go to OpenAI through Ledgerly's server. Nothing is sent to your courier.</p>
+          </div>
+        </aside>
+
+        <section class="ledger" aria-labelledby="ledger-title">
+          <div class="ledger-head">
+            <h2 id="ledger-title">Ledger</h2>
+            <div class="filters" role="group" aria-label="Show">
+              <button type="button" class="filter" data-filter="review" aria-pressed="true">Needs you <span id="n-review"></span></button>
+              <button type="button" class="filter" data-filter="matched" aria-pressed="false">Matched <span id="n-matched"></span></button>
+              <button type="button" class="filter" data-filter="all" aria-pressed="false">All <span id="n-all"></span></button>
+            </div>
+            <label class="search"><span class="sr-only">Search orders</span><input id="search" type="search" placeholder="Search order or customer"></label>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Order</th><th scope="col">Delivered</th><th scope="col" class="num">Expected</th><th scope="col" class="num">Received</th><th scope="col">Status</th></tr></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="view-claims" aria-labelledby="claims-title" hidden>
+      <div class="head">
+        <h1 id="claims-title">Claims</h1>
+        <p class="subline">Drafts wait here until you send them yourself. Track each one until the courier pays.</p>
+      </div>
+      <div id="claims-list"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Ledgerly is a hackathon prototype. Sample shop, customers and amounts are made up for the demo.</span>
+    <a href="https://github.com/zachthedude/ledgerly">Source code</a>
+  </footer>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <dialog id="upload-dialog" aria-labelledby="upload-title">
+    <form method="dialog" class="dialog" id="upload-form">
+      <h2 id="upload-title">Upload statements</h2>
+      <p>Use the CSV exports you already have. Keep the header row.</p>
+      <label class="file-field">Order export <small>From your store or order sheet</small><input type="file" id="file-orders" accept=".csv,text/csv" required></label>
+      <label class="file-field">Courier payout statement <small>From Pathao, RedX, Steadfast or another courier</small><input type="file" id="file-payouts" accept=".csv,text/csv" required></label>
+      <p class="form-error" id="upload-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" class="button" value="cancel" data-close>Cancel</button>
+        <button type="submit" class="button primary" id="upload-submit">Reconcile files</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="detail-dialog" aria-labelledby="detail-title">
+    <div class="dialog">
+      <h2 id="detail-title"></h2>
+      <div id="detail-body"></div>
+      <div class="dialog-actions">
+        <button type="button" class="button" data-close>Close</button>
+        <button type="button" class="button primary" id="detail-claim">Draft claim</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="how-dialog" aria-labelledby="how-title">
+    <div class="dialog prose">
+      <h2 id="how-title">How the agent works</h2>
+      <p>Courier statements are messy. Order numbers get typed wrong, end up in a note, or one payment arrives as two lines. Matching by rules treats all of that as missing money, so real shortfalls hide among false alarms.</p>
+      <p>When you press <strong>Check with the agent</strong>, an OpenAI model works through your files using five tools that run in your browser:</p>
+      <ol>
+        <li><strong>Inspect files.</strong> Reads column names and a few rows.</li>
+        <li><strong>Map columns and reconcile.</strong> Picks which column is the order ID, the amount, the fee. Ledgerly's own code then does every calculation.</li>
+        <li><strong>Propose match.</strong> Links a stray statement line to an order and says why. It changes nothing until you approve.</li>
+        <li><strong>Draft claim.</strong> Writes a message to the courier in English or Bangla. Every taka amount is checked against the ledger; a wrong amount is sent back to the agent to fix.</li>
+        <li><strong>Finish.</strong> Summarises what it found.</li>
+      </ol>
+      <p>The model never does arithmetic and never sends anything. You approve matches and send claims yourself.</p>
+      <div class="dialog-actions"><button type="button" class="button primary" data-close>Close</button></div>
+    </div>
+  </dialog>
+
+  <script src="engine.js"></script>
+  <script src="samples.js"></script>
+  <script src="agent.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
