@@ -1,4 +1,4 @@
-const AGENT_URL = window.LEDGERLY_AGENT_URL || "https://ledgerly-agent.zachthedude.workers.dev";
+const AGENT_URL = window.LEDGERLY_AGENT_URL || "https://ledgerly-agent.zacharry-samuel.workers.dev";
 const E = Engine;
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
